@@ -1,544 +1,171 @@
 <!DOCTYPE html>
-<html lang="it" data-theme="dark">
+<html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-  <title>Tribunal Difensore</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turni Staff Planner</title>
   <style>
-    :root{
-      --bg:#131315;
-      --surface:#1b1b1f;
-      --surface2:#24242a;
-      --border:#34343c;
-      --text:#f0ede7;
-      --muted:#adabb2;
-      --primary:#58a4af;
-      --primary2:#7a88ff;
-      --chip:#232d31;
-      --shadow:0 16px 40px rgba(0,0,0,.32);
-      --top-safe:max(env(safe-area-inset-top),0px);
-      --bottom-safe:max(env(safe-area-inset-bottom),0px);
-      --space2:.5rem;
-      --space3:.75rem;
-      --space4:1rem;
-      --radius:22px;
+    :root {
+      --sage-50: #f8faf7; --sage-100: #eaf3ea; --sage-500: #6b9b6a; --sage-600: #5a8b59;
+      --glass-bg: rgba(255,255,255,0.1); --glass-border: rgba(255,255,255,0.2);
+      --bar-sala: #3b82f6; --bar-bar: #ef4444; --bar-cucina: #eab308; --bar-jolly: #8b5cf6;
     }
-    [data-theme="light"]{
-      --bg:#f7f6f2;
-      --surface:#fcfbf8;
-      --surface2:#f0ede7;
-      --border:#d9d2c7;
-      --text:#221f1a;
-      --muted:#6b665d;
-      --primary:#0b666e;
-      --primary2:#164a6b;
-      --chip:#e6eeef;
-      --shadow:0 12px 30px rgba(34,31,26,.08);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-text-size-adjust:100%;overscroll-behavior:none}
-    body{display:flex;justify-content:center;align-items:stretch;overflow:hidden}
-    button{font:inherit;border:0;background:none;color:inherit}
-    .app{
-      width:min(100vw,460px);
-      height:100dvh;
-      padding-top:var(--top-safe);
-      padding-bottom:var(--bottom-safe);
-      background:var(--bg);
-      overflow:hidden;
-    }
-    .shell{
-      height:100%;
-      display:grid;
-      grid-template-rows:auto auto 1fr auto;
-      gap:var(--space3);
-      padding:var(--space3);
-      min-height:0;
-    }
-    .topbar,.hud,.viewport,.bottom-nav{min-width:0}
-    .topbar{
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      padding:var(--space3) var(--space4);
-      box-shadow:var(--shadow);
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:var(--space3);
-      align-items:center;
-    }
-    .brand{min-width:0}
-    .eyebrow{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-    .title{font-weight:900;font-size:1.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .theme-btn{
-      width:44px;height:44px;border-radius:14px;
-      background:var(--surface2);border:1px solid var(--border);
-      display:grid;place-items:center
-    }
-    .hud{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:var(--space2);
-    }
-    .stat{
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:.7rem .6rem;
-      box-shadow:var(--shadow);
-    }
-    .k{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-    .v{font-size:.98rem;font-weight:900;margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .viewport{
-      min-height:0;
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:28px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      position:relative;
-    }
-    .screen{
-      height:100%;
-      display:none;
-      padding:var(--space3);
-      grid-template-rows:auto 1fr;
-      gap:var(--space3);
-      min-height:0;
-      overflow:hidden;
-    }
-    .screen.active{display:grid}
-    .screen-head{display:flex;justify-content:space-between;gap:var(--space2);align-items:flex-start}
-    .screen-title{font-size:1.1rem;font-weight:900}
-    .screen-sub{font-size:.9rem;color:var(--muted);margin-top:.15rem}
-    .badge{
-      padding:.38rem .72rem;
-      border-radius:999px;
-      background:var(--chip);
-      color:var(--primary);
-      font-size:.72rem;
-      font-weight:800;
-      white-space:nowrap;
-      flex-shrink:0;
-    }
-    .scroll{
-      min-height:0;
-      overflow:auto;
-      -webkit-overflow-scrolling:touch;
-      padding-right:2px;
-    }
-    .cases{display:grid;gap:var(--space3)}
-    .card,.assistant,.calendar,.result,.paper,.dialog{
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:22px;
-      box-shadow:var(--shadow);
-    }
-    .card{padding:var(--space4);display:grid;gap:var(--space3)}
-    .row{display:flex;justify-content:space-between;gap:var(--space3);font-size:.9rem;color:var(--muted)}
-    .card h3,.paper h3,.result h3{margin:0}
-    .card p,.paper p,.result p,.dialog-text{margin:0;color:var(--muted);line-height:1.5;font-size:.9rem}
-    .actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--space2)}
-    .btn{
-      min-height:46px;border-radius:16px;font-weight:900;
-      display:flex;align-items:center;justify-content:center;
-      padding:0 .95rem
-    }
-    .primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff}
-    .secondary{background:var(--surface2);border:1px solid var(--border)}
-    .trial{
-      display:grid;
-      grid-template-rows:auto auto 1fr auto;
-      gap:var(--space3);
-      min-height:0;
-    }
-    .assistant{padding:var(--space4);display:grid;gap:.3rem}
-    .assistant-name{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--primary);font-weight:900}
-    .assistant-text{font-size:.9rem}
-    .calendar{padding:var(--space4);display:flex;justify-content:space-between;gap:var(--space3);align-items:center}
-    .day-pill{padding:.5rem .8rem;border-radius:999px;background:var(--chip);font-weight:900;color:var(--primary);white-space:nowrap}
-    .dialogs{display:grid;gap:.5rem;align-content:start}
-    .dialog{padding:.8rem}
-    .role{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.25rem;font-weight:900}
-    .choice-row{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space2)}
-    .choice{
-      padding:.85rem .75rem;
-      border-radius:18px;
-      text-align:left;
-      background:var(--surface);
-      border:1px solid var(--border);
-      min-width:0;
-    }
-    .choice strong{display:block;font-size:.9rem}
-    .choice span{display:block;font-size:.72rem;color:var(--muted);margin-top:.2rem}
-    .choice.selected{border-color:var(--primary);background:color-mix(in srgb,var(--primary) 12%,var(--surface))}
-    .manual,.docs{
-      display:grid;
-      grid-template-columns:106px 1fr;
-      gap:var(--space3);
-      min-height:0;
-    }
-    .list{display:grid;gap:.5rem;align-content:start}
-    .list button{
-      padding:.8rem .65rem;
-      border-radius:18px;
-      text-align:left;
-      background:var(--surface);
-      border:1px solid var(--border);
-      font-size:.9rem;
-    }
-    .list button.active{border-color:var(--primary);background:color-mix(in srgb,var(--primary) 12%,var(--surface))}
-    .content{min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding-right:2px}
-    .paper,.result{padding:var(--space4)}
-    .meter{height:12px;border-radius:999px;background:var(--surface2);overflow:hidden}
-    .meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--primary2));border-radius:inherit;transition:width .5s ease}
-    .bottom-nav{
-      display:grid;
-      grid-template-columns:repeat(5,1fr);
-      gap:var(--space2);
-      padding:var(--space2);
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:22px;
-      box-shadow:var(--shadow);
-    }
-    .nav{
-      min-height:54px;
-      border-radius:18px;
-      display:grid;
-      place-items:center;
-      color:var(--muted);
-      font-size:11px;
-      font-weight:800;
-      gap:.15rem;
-    }
-    .nav.active{background:color-mix(in srgb,var(--primary) 18%,var(--surface));color:var(--text)}
-    @media (max-width:390px){
-      .topbar{padding:.8rem .9rem}
-      .hud{gap:.4rem}
-      .stat{padding:.62rem .55rem}
-      .manual,.docs{grid-template-columns:96px 1fr}
-      .choice-row,.actions{grid-template-columns:1fr}
-      .title{font-size:1.02rem}
-    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: -apple-system, sans-serif; background: linear-gradient(135deg, var(--sage-500), var(--sage-600));
+      min-height:100vh; color:#333; padding:1rem; }
+    .container { max-width:1200px; margin:0 auto; }
+    .header { background:var(--glass-bg); backdrop-filter:blur(20px); border:1px solid var(--glass-border);
+      border-radius:20px; padding:1.5rem; margin-bottom:1rem; display:flex; gap:1rem; align-items:center; }
+    input, select, button { padding:0.75rem 1rem; border:1px solid var(--glass-border); border-radius:12px;
+      background:var(--glass-bg); backdrop-filter:blur(10px); color:inherit; font-size:1rem; }
+    button { background:var(--sage-500); border:none; cursor:pointer; transition:all 0.2s; font-weight:500; }
+    button:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.2); }
+    .staff-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; margin-bottom:2rem; }
+    .staff-card { background:var(--glass-bg); backdrop-filter:blur(20px); border:1px solid var(--glass-border); border-radius:16px;
+      padding:1.5rem; cursor:pointer; transition:all 0.2s; }
+    .staff-card:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(0,0,0,0.15); }
+    .staff-name { font-size:1.25rem; font-weight:600; margin-bottom:0.25rem; }
+    .staff-role { color:var(--sage-100); font-size:0.95rem; text-transform:uppercase; letter-spacing:0.5px; }
+    .table-container { background:var(--glass-bg); backdrop-filter:blur(20px); border-radius:20px; padding:1.5rem; overflow:auto; }
+    table { width:100%; border-collapse:collapse; font-size:0.95rem; }
+    th, td { padding:0.75rem 0.5rem; text-align:center; border-bottom:1px solid var(--glass-border); }
+    th { background:var(--sage-500); color:white; font-weight:500; position:sticky;left:0; z-index:10; }
+    .day-header { writing-mode:vertical-rl; text-orientation:mixed; font-weight:500; }
+    .staff-bar { height:20px; border-radius:10px; margin:0 auto 0.25rem; position:relative; }
+    .staff-bar::before { content:attr(data-name); position:absolute; right:-4rem; top:0; font-size:0.8rem; color:var(--sage-100); }
+    .sala { background:var(--bar-sala); } .bar { background:var(--bar-bar); } .cucina { background:var(--bar-cucina); } .jolly { background:var(--bar-jolly); }
+    .total-row td { font-weight:600; background:var(--sage-500); color:white; }
+    .delete-btn { background:#ef4444; color:white; padding:0.25rem 0.5rem; font-size:0.8rem; border-radius:6px; }
+    .edit-mode { outline:2px solid var(--sage-500); }
+    @media (max-width:768px) { .staff-grid { grid-template-columns:1fr; } th:first-child { position:static; } }
   </style>
 </head>
 <body>
-<div class="app">
-  <div class="shell">
-    <header class="topbar">
-      <div class="brand">
-        <div class="eyebrow">Studio penale</div>
-        <div class="title">Tribunal Difensore</div>
-      </div>
-      <button class="theme-btn" id="themeBtn">◐</button>
-    </header>
-
-    <div class="hud">
-      <div class="stat"><div class="k">Fama</div><div class="v" id="fameVal">12</div></div>
-      <div class="stat"><div class="k">Soldi</div><div class="v" id="moneyVal">2.400</div></div>
-      <div class="stat"><div class="k">Casi</div><div class="v" id="caseVal">0 / 0</div></div>
-      <div class="stat"><div class="k">Giorno</div><div class="v" id="dayVal">1</div></div>
+  <div class="container">
+    <div class="header">
+      <h1>🕒 Turni Staff Planner</h1>
+      <input id="nameInput" placeholder="Nome dipendente" maxlength="20">
+      <select id="roleInput">
+        <option value="sala">Sala</option>
+        <option value="bar">Bar</option>
+        <option value="cucina">Cucina</option>
+        <option value="jolly">Jolly</option>
+      </select>
+      <input id="hoursInput" type="number" min="0" max="12" value="8" style="width:60px;">
+      <button onclick="addStaff()">➕ Aggiungi</button>
+      <button onclick="exportData()">📤 Esporta</button>
+      <button onclick="clearAll()">🗑️ Reset</button>
     </div>
 
-    <main class="viewport">
-      <section class="screen active" data-screen="dashboard">
-        <div class="screen-head">
-          <div>
-            <div class="screen-title">Casi disponibili</div>
-            <div class="screen-sub">Accetta o rifiuta. Ogni scelta influenza fama e carriera.</div>
-          </div>
-        </div>
-        <div class="scroll cases">
-          <article class="card">
-            <div class="row"><span>Giallo 1</span><span class="badge">Media</span></div>
-            <h3>Il gioielliere Rossi</h3>
-            <p>Un cliente sostiene di aver acquistato merce senza sapere la provenienza illecita.</p>
-            <div class="row"><span>Ricompensa</span><strong>1.800</strong></div>
-            <div class="actions">
-              <button class="btn primary" data-accept="rossi">Accetta</button>
-              <button class="btn secondary" data-reject="rossi">Rifiuta</button>
-            </div>
-          </article>
-          <article class="card">
-            <div class="row"><span>Giallo 2</span><span class="badge">Alta</span></div>
-            <h3>Martina Bassi</h3>
-            <p>La cliente sostiene di aver reagito a un'aggressione improvvisa fuori da un locale.</p>
-            <div class="row"><span>Ricompensa</span><strong>3.200</strong></div>
-            <div class="actions">
-              <button class="btn primary" data-accept="bassi">Accetta</button>
-              <button class="btn secondary" data-reject="bassi">Rifiuta</button>
-            </div>
-          </article>
-          <article class="card">
-            <div class="row"><span>Giallo 3</span><span class="badge">Molto alta</span></div>
-            <h3>Luca Ferri</h3>
-            <p>Un dirigente accusato di aver firmato documenti alterati all'interno di una gara privata.</p>
-            <div class="row"><span>Ricompensa</span><strong>4.700</strong></div>
-            <div class="actions">
-              <button class="btn primary" data-accept="ferri">Accetta</button>
-              <button class="btn secondary" data-reject="ferri">Rifiuta</button>
-            </div>
-          </article>
-        </div>
-      </section>
+    <div class="staff-grid" id="staffList"></div>
 
-      <section class="screen" data-screen="trial">
-        <div class="screen-head">
-          <div>
-            <div class="screen-title" id="trialTitle">Processo</div>
-            <div class="screen-sub" id="trialSub">Seleziona un caso per iniziare.</div>
-          </div>
-          <span class="badge" id="phaseBadge">Giorno 1</span>
-        </div>
-        <div class="trial">
-          <div class="assistant" id="assistantBox">
-            <div class="assistant-name">Assistente</div>
-            <div class="assistant-text">Apri un caso dalla sezione Home per avviare il processo.</div>
-          </div>
-          <div class="calendar">
-            <div class="screen-sub">Durata del processo</div>
-            <strong id="durationText">-</strong>
-          </div>
-          <div class="scroll dialogs" id="dialogWrap"></div>
-          <div class="choice-row">
-            <button class="choice" data-choice="evidence"><strong>Mostra prova</strong><span>Colpisci con i documenti.</span></button>
-            <button class="choice" data-choice="objection"><strong>Obiezione</strong><span>Ferma la controparte.</span></button>
-            <button class="choice" data-choice="pressure"><strong>Controesame</strong><span>Metti pressione al testimone.</span></button>
-          </div>
-        </div>
-      </section>
-
-      <section class="screen" data-screen="manual">
-        <div class="screen-head">
-          <div>
-            <div class="screen-title">Manuale legale</div>
-            <div class="screen-sub">Consultazione rapida durante il processo.</div>
-          </div>
-        </div>
-        <div class="manual">
-          <div class="list" id="manualList"></div>
-          <div class="content"><div class="paper" id="manualSheet"></div></div>
-        </div>
-      </section>
-
-      <section class="screen" data-screen="docs">
-        <div class="screen-head">
-          <div>
-            <div class="screen-title">Fascicolo difensivo</div>
-            <div class="screen-sub">Tutti i documenti utili per il cliente attivo.</div>
-          </div>
-        </div>
-        <div class="docs">
-          <div class="list" id="docsList"></div>
-          <div class="content"><div class="paper" id="docSheet"></div></div>
-        </div>
-      </section>
-
-      <section class="screen" data-screen="studio">
-        <div class="screen-head">
-          <div>
-            <div class="screen-title">Studio e reputazione</div>
-            <div class="screen-sub">La tua carriera cambia con ogni verdetto.</div>
-          </div>
-        </div>
-        <div class="scroll" style="display:grid;gap:var(--space3)">
-          <div class="result">
-            <h3>Prestigio professionale</h3>
-            <p id="studioDesc">Sei ancora un nome emergente del foro. Ogni caso vinto apre nuovi clienti e parcelle migliori.</p>
-            <div class="meter"><span id="fameMeter"></span></div>
-          </div>
-          <div class="paper">
-            <h3>Assistente personale</h3>
-            <p id="assistantStats">Lucia organizza fascicoli, trova contraddizioni e suggerisce il ritmo giusto del controesame.</p>
-          </div>
-          <div class="paper">
-            <h3>Ultimo esito</h3>
-            <p id="lastResult">Nessun verdetto ancora emesso.</p>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <nav class="bottom-nav" aria-label="Navigazione principale">
-      <button class="nav active" data-target="dashboard">Home</button>
-      <button class="nav" data-target="trial">Aula</button>
-      <button class="nav" data-target="manual">Manuale</button>
-      <button class="nav" data-target="docs">Atti</button>
-      <button class="nav" data-target="studio">Studio</button>
-    </nav>
+    <div class="table-container">
+      <table id="scheduleTable">
+        <thead><tr><th>Personale</th><th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th><th>Tot Ore</th></tr></thead>
+        <tbody id="tableBody"></tbody>
+        <tfoot id="totals"></tfoot>
+      </table>
+    </div>
   </div>
-</div>
 
-<script>
-const state={fame:12,money:2400,wins:0,losses:0,day:1,activeScreen:'dashboard',activeCaseId:null,activeDoc:0,activeManual:0,selectedChoice:null,lastVerdict:'Nessun verdetto ancora emesso.'};
+  <script>
+    let staff = JSON.parse(localStorage.getItem('staff')) || [];
+    let schedule = JSON.parse(localStorage.getItem('schedule')) || {};
+    const days = ['lun','mar','mer','gio','ven','sab','dom'];
 
-const cases=[
-  {id:'rossi',title:'Il gioielliere Rossi',charge:'Accusa di ricettazione',difficulty:'Media',reward:1800,days:2,risk:8,summary:'Un cliente sostiene di aver acquistato merce senza sapere la provenienza illecita.',assistant:['Il punto forte è la buona fede: insisti sulla tracciabilità dei pagamenti e sulle comunicazioni commerciali.','Nel secondo giorno la procura spingerà sul prezzo troppo basso: prepara il confronto con i listini reali.'],docs:[{title:'Contratto di acquisto',body:'Contratto firmato con clausole standard, data certa, indicazione del fornitore e pagamento tracciabile.'},{title:'Bonifico bancario',body:'Ricevuta del bonifico eseguito dal cliente con causale commerciale coerente e importo allineato alla trattativa.'},{title:'Messaggi con il fornitore',body:'Scambio di messaggi in cui il fornitore presenta i beni come provenienti da stock regolare.'}],rounds:[{prosecution:'Il prezzo anomalo dei gioielli prova che l’imputato doveva sospettare l’origine illecita.',defense:{evidence:'Produco bonifico e contratto: il mio assistito ha acquistato con modalità trasparenti e verificabili.',objection:'Obiezione: la procura afferma una presunta anomalia di prezzo senza produrre un reale parametro di mercato.',pressure:'Controesame: il teste della vendita ammette di non aver mostrato alcun catalogo comparativo in fase di indagine.'},response:'La corte prende atto e rinvia l’analisi economica alla seconda udienza.'},{prosecution:'Il commerciante esperto non poteva ignorare i segnali di allarme collegati alla provenienza dei beni.',defense:{evidence:'Deposito le chat complete: il fornitore ha garantito la regolarità della merce e indicato l’origine da chiusura attività.',objection:'Obiezione: si sta sostituendo un sospetto retrospettivo a un elemento concreto di dolo o colpa grave.',pressure:'Controesame serrato: il verbalizzante conferma che il negozio esponeva regolarmente fatture e documenti di carico.'},response:'Le contraddizioni della ricostruzione accusatoria indeboliscono l’impianto della procura.'}]},
-  {id:'bassi',title:'Martina Bassi',charge:'Lesioni in legittima difesa',difficulty:'Alta',reward:3200,days:3,risk:15,summary:'La cliente sostiene di aver reagito a un’aggressione improvvisa fuori da un locale.',assistant:['Qui conta la proporzione della reazione: fatti dare tempi, spazi e distanza esatta.','Il testimone oculare incerto va attaccato sulla visuale ridotta e sull’illuminazione.','Chiudi sul pericolo attuale e sulla mancanza di alternative concrete di fuga.'],docs:[{title:'Referto pronto soccorso',body:'La cliente presenta escoriazioni compatibili con una colluttazione e trauma al polso sinistro.'},{title:'Relazione fotografica',body:'Fotografie della zona mostrano scarsa illuminazione e spazio di manovra ristretto vicino all’uscita.'},{title:'Verbale del testimone',body:'Il testimone dichiara di aver visto solo gli istanti finali e da posizione laterale.'}],rounds:[{prosecution:'La reazione dell’imputata appare eccessiva rispetto alla minaccia subita.',defense:{evidence:'Deposito il referto medico: i segni sul corpo dimostrano che l’aggressione era concreta e non solo percepita.',objection:'Obiezione: la valutazione di eccesso è apodittica se scollegata dal contesto di pericolo immediato.',pressure:'Controesame: il testimone ammette di non aver visto come sia iniziata la colluttazione.'},response:'L’aula si concentra ora sulla sequenza iniziale dei fatti.'},{prosecution:'Esisteva una via di fuga e quindi la reazione violenta non era necessaria.',defense:{evidence:'Produco foto e planimetria: l’uscita era stretta, affollata e in ombra, la fuga non era sicura né immediata.',objection:'Obiezione: si ipotizza una scelta ideale a posteriori, non una possibilità reale nel momento dell’aggressione.',pressure:'Controesame: il verbalizzante conferma che sul posto c’era confusione e visuale ridotta.'},response:'La tesi della procura perde forza sulla concreta praticabilità della fuga.'},{prosecution:'L’imputata ha continuato oltre il necessario, superando i limiti della difesa.',defense:{evidence:'Richiamo il referto e le testimonianze: la reazione è stata unica, breve e finalizzata a cessare il pericolo.',objection:'Obiezione: si confonde la durata percepita con la durata reale dell’azione difensiva.',pressure:'Controesame finale: il testimone conferma di aver sentito urla e visto la separazione quasi immediata tra le parti.'},response:'La difesa chiude evidenziando attualità del pericolo e proporzione della reazione.'}]},
-  {id:'ferri',title:'Luca Ferri',charge:'Frode documentale',difficulty:'Molto alta',reward:4700,days:3,risk:22,summary:'Un dirigente accusato di aver firmato documenti alterati all’interno di una gara privata.',assistant:['Questo caso si vince sulle firme digitali e sulla catena di accesso ai documenti.','Metti in crisi la certezza della paternità materiale delle modifiche.','Nell’arringa finale sposta il focus sul ragionevole dubbio tecnico.'],docs:[{title:'Audit informatico',body:'L’accesso al file contestato risulta avvenuto da due utenze differenti nelle ore precedenti all’invio.'},{title:'Mail interne',body:'Le email mostrano passaggi di revisione multipli e una versione non definitiva circolata tra colleghi.'},{title:'Registro firme',body:'La firma del cliente compare solo sull’ultima versione, senza prova che egli abbia eseguito le modifiche pregresse.'}],rounds:[{prosecution:'Il documento finale porta la firma dell’imputato, quindi l’alterazione gli è attribuibile.',defense:{evidence:'Deposito l’audit informatico: il file è stato aperto e modificato da utenze diverse prima della firma finale.',objection:'Obiezione: si confonde la firma di validazione con la materiale manipolazione del contenuto.',pressure:'Controesame: il consulente della procura ammette che il log non individua con certezza l’autore delle revisioni.'},response:'La questione tecnica sulla paternità materiale diventa centrale.'},{prosecution:'L’imputato aveva interesse a falsare il documento per favorire la propria società.',defense:{evidence:'Produco le mail interne: emerge un flusso collettivo di revisione e nessuna direttiva personale del cliente verso l’alterazione.',objection:'Obiezione: il movente ipotizzato non può sostituire la prova dell’azione materiale contestata.',pressure:'Controesame: il responsabile IT conferma l’assenza di autenticazione forte su alcune postazioni condivise.'},response:'Il quadro resta ambiguo e la certezza accusatoria si incrina.'},{prosecution:'La firma finale dimostra comunque adesione consapevole al contenuto alterato.',defense:{evidence:'Richiamo il registro firme: la sottoscrizione riguarda una versione ricevuta come definitiva da terzi, non la fase di manipolazione.',objection:'Obiezione: manca il ponte logico tra approvazione formale e consapevolezza della pregressa alterazione fraudolenta.',pressure:'Controesame finale: il consulente conferma che nessun elemento esclude l’intervento di altri operatori sulla bozza.'},response:'La difesa chiude sul ragionevole dubbio tecnico e sulla pluralità di accessi al file.'}]}
-];
+    function saveData() {
+      localStorage.setItem('staff', JSON.stringify(staff));
+      localStorage.setItem('schedule', JSON.stringify(schedule));
+    }
 
-const manualSections=[
-  {title:'Principi',body:'<h3>Principi della difesa</h3><p>Presunzione di innocenza, onere della prova a carico dell’accusa, diritto al contraddittorio e tutela piena della posizione dell’imputato.</p>'},
-  {title:'Procedura',body:'<h3>Procedura d’aula</h3><p>Nel gioco conviene alternare obiezioni, produzioni documentali e controesame. L’ordine degli interventi incide sulla percezione del giudice.</p>'},
-  {title:'Sostanziale',body:'<h3>Diritto sostanziale</h3><p>Elemento soggettivo, nesso tra fatto e responsabilità, proporzione della condotta, assenza di dolo o colpa grave.</p>'},
-  {title:'Strategia',body:'<h3>Strategia pratica</h3><p>Il gioco premia una difesa lucida. Non scegliere sempre la stessa mossa: la qualità del caso e il giorno di udienza contano.</p>'}
-];
+    function renderStaff() {
+      const grid = document.getElementById('staffList');
+      grid.innerHTML = staff.map((s, i) => `
+        <div class="staff-card" onclick="toggleEdit(${i})" data-id="${i}">
+          <div class="staff-name">${s.name}</div>
+          <div class="staff-role ${s.role}">${s.role.toUpperCase()}</div>
+          <div>Default: ${s.defaultHours}h/giorno</div>
+        </div>
+      `).join('');
+    }
 
-const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-const fmt=n=>n.toLocaleString('it-IT');
-const currentCase=()=>cases.find(c=>c.id===state.activeCaseId)||null;
+    function renderTable() {
+      const body = document.getElementById('tableBody');
+      body.innerHTML = staff.map((s, i) => {
+        const rowHours = days.map(d => schedule[`${s.id}-${d}`] || s.defaultHours);
+        const total = rowHours.reduce((a,b)=>a+b,0);
+        return `<tr data-id="${i}">
+          <td><div class="staff-bar ${s.role}" data-name="${s.name}" style="width:${Math.min(total/56*100,100)}%"></div>${s.name}<br><small>${s.role}</small></td>
+          ${days.map(d => `<td onclick="setHours(${i},'${d}',this)" data-day="${d}">${rowHours[days.indexOf(d)] || s.defaultHours}h</td>`).join('')}
+          <td>${total}h</td>
+          <td><button class="delete-btn" onclick="deleteStaff(${i})">✕</button></td>
+        </tr>`;
+      }).join('');
 
-function renderHud(){
-  fameVal.textContent=state.fame;
-  moneyVal.textContent=fmt(state.money);
-  caseVal.textContent=`${state.wins} / ${state.losses}`;
-  dayVal.textContent=state.day;
-  fameMeter.style.width=Math.min(100,state.fame)+'%';
-  lastResult.textContent=state.lastVerdict;
-  studioDesc.textContent=state.fame<25?'Sei ancora un nome emergente del foro. Ogni caso vinto apre nuovi clienti e parcelle migliori.':state.fame<45?'La tua firma comincia a pesare. I clienti più complessi bussano alla porta del tuo studio.':state.fame<70?'Sei un difensore ricercato. La stampa segue i processi e gli assistenti lavorano a ritmo serrato.':'Sei diventato un nome di riferimento del foro penale. Ogni verdetto può cambiare gli equilibri della città.';
-  assistantStats.textContent=state.fame<40?'Lucia organizza fascicoli, trova contraddizioni e suggerisce il ritmo giusto del controesame.':'Lucia coordina dossier complessi, prepara testimoni e filtra i casi più redditizi prima ancora che arrivino in aula.';
-}
+      // Totali
+      const totals = days.map(d => staff.reduce((sum,s) => sum + (schedule[`${s.id}-${d}`] || s.defaultHours), 0));
+      const grandTotal = totals.reduce((a,b)=>a+b,0);
+      document.getElementById('totals').innerHTML = `<tr class="total-row">
+        <td>TOTALE</td>${totals.map(t=>`<td>${t}h</td>`).join('')}<td>${grandTotal}h</td><td></td></tr>`;
+    }
 
-function switchScreen(name){
-  state.activeScreen=name;
-  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.dataset.screen===name));
-  document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.target===name));
-  if(name==='docs') renderDocs();
-  if(name==='manual') renderManual();
-  if(name==='studio') renderHud();
-}
+    function addStaff() {
+      const name = document.getElementById('nameInput').value.trim();
+      const role = document.getElementById('roleInput').value;
+      const hours = parseInt(document.getElementById('hoursInput').value) || 8;
+      if (!name) return;
+      const id = Date.now().toString();
+      staff.push({id, name, role, defaultHours: hours});
+      document.getElementById('nameInput').value = '';
+      saveData();
+      renderStaff();
+      renderTable();
+    }
 
-function renderCases(){
-  const list=document.querySelector('.cases');
-  list.innerHTML='';
-  cases.forEach(c=>{
-    const el=document.createElement('article');
-    el.className='card';
-    el.innerHTML=`
-      <div class="row"><span>${c.title}</span><span class="badge">${c.difficulty}</span></div>
-      <h3>${c.title}</h3>
-      <p>${c.summary}</p>
-      <div class="row"><span>Ricompensa</span><strong>${fmt(c.reward)}</strong></div>
-      <div class="actions">
-        <button class="btn primary" data-accept="${c.id}">Accetta</button>
-        <button class="btn secondary" data-reject="${c.id}">Rifiuta</button>
-      </div>`;
-    list.appendChild(el);
-  });
-  document.querySelectorAll('[data-accept]').forEach(b=>b.onclick=()=>startCase(b.dataset.accept));
-  document.querySelectorAll('[data-reject]').forEach(b=>b.onclick=()=>rejectCase(b.dataset.reject));
-}
+    function deleteStaff(i) {
+      staff.splice(i,1);
+      Object.keys(schedule).forEach(k => { if (k.startsWith(staff[i]?.id)) delete schedule[k]; });
+      saveData();
+      renderStaff();
+      renderTable();
+    }
 
-function renderManual(){
-  const list=manualList;
-  list.innerHTML='';
-  manualSections.forEach((m,i)=>{
-    const btn=document.createElement('button');
-    btn.className=i===state.activeManual?'active':'';
-    btn.textContent=m.title;
-    btn.onclick=()=>{state.activeManual=i; renderManual();};
-    list.appendChild(btn);
-  });
-  manualSheet.innerHTML=manualSections[state.activeManual].body;
-}
+    function setHours(i, day, cell) {
+      const staffId = staff[i].id;
+      const current = parseInt(cell.textContent) || staff[i].defaultHours;
+      const newH = prompt(`Ore per ${staff[i].name} (${day}):`, current);
+      if (newH !== null && !isNaN(newH)) {
+        schedule[`${staffId}-${day}`] = parseInt(newH);
+        saveData();
+        renderTable();
+      }
+    }
 
-function renderDocs(){
-  const c=currentCase();
-  docsList.innerHTML='';
-  if(!c){
-    docSheet.innerHTML='<h3>Nessun fascicolo attivo</h3><p>Accetta un caso per sbloccare documenti, atti e materiali utili alla difesa.</p>';
-    return;
-  }
-  c.docs.forEach((d,i)=>{
-    const btn=document.createElement('button');
-    btn.className=i===state.activeDoc?'active':'';
-    btn.textContent=d.title;
-    btn.onclick=()=>{state.activeDoc=i; renderDocs();};
-    docsList.appendChild(btn);
-  });
-  const d=c.docs[state.activeDoc];
-  docSheet.innerHTML=`<h3>${d.title}</h3><p>${d.body}</p>`;
-}
+    function toggleEdit(i) {
+      const card = document.querySelector(`[data-id="${i}"]`);
+      card.classList.toggle('edit-mode');
+      // Qui logica edit dettagli
+    }
 
-function pushDialog(role,line,cls){
-  const card=document.createElement('div');
-  card.className=`dialog ${cls}`;
-  card.innerHTML=`<div class="role">${role}</div><div class="dialog-text">${line}</div>`;
-  dialogWrap.appendChild(card);
-  dialogWrap.scrollTop=dialogWrap.scrollHeight;
-}
+    function exportData() {
+      const data = {staff, schedule, generated: new Date().toISOString()};
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'turni-staff.json'; a.click();
+    }
 
-function startCase(id){
-  const c=cases.find(x=>x.id===id);
-  if(!c) return;
-  state.activeCaseId=id;
-  state.activeDoc=0;
-  state.selectedChoice=null;
-  dialogWrap.innerHTML='';
-  trialTitle.textContent=c.title;
-  trialSub.textContent=c.charge;
-  durationText.textContent=`${c.days} giorni di udienza`;
-  phaseBadge.textContent='Giorno 1';
-  assistantBox.querySelector('.assistant-text').textContent=c.assistant[0];
-  pushDialog('Cancelliere',`Si apre il processo ${c.title}. Capo d’imputazione: ${c.charge}.`,'');
-  pushDialog('Pubblico ministero',c.rounds[0].prosecution,'');
-  renderDocs();
-  switchScreen('trial');
-}
+    function clearAll() {
+      if (confirm('Cancella tutto?')) {
+        staff = []; schedule = {};
+        localStorage.clear();
+        renderStaff(); renderTable();
+      }
+    }
 
-function rejectCase(id){
-  const c=cases.find(x=>x.id===id);
-  if(!c) return;
-  state.fame=Math.max(0,state.fame-1);
-  state.lastVerdict=`Hai rifiutato il caso ${c.title}. La città nota la tua prudenza, ma perdi un po' di slancio.`;
-  state.day+=1;
-  renderHud();
-  switchScreen('studio');
-}
-
-function concludeCase(choice,c){
-  const favored=(c.id==='ferri'&&choice==='evidence')||(c.id==='bassi'&&choice==='pressure')||(c.id==='rossi'&&choice==='objection');
-  const score=favored?60:43+Math.max(0,state.fame-c.risk)*0.45;
-  const win=score>=50;
-  if(win){
-    state.wins++;
-    state.fame+=Math.round(c.risk/2)+4;
-    state.money+=c.reward;
-    state.lastVerdict=`Assoluzione o forte ridimensionamento per ${c.title}. Incassi ${fmt(c.reward)} e la tua fama sale.`;
-    pushDialog('Giudice','La corte rileva un quadro probatorio insufficiente o comunque incrinato dalla linea difensiva.','');
-  }else{
-    state.losses++;
-    state.fame=Math.max(0,state.fame-Math.round(c.risk/2)-2);
-    state.lastVerdict=`Il caso ${c.title} si chiude male. La tua popolarità ne risente e lo studio perde slancio.`;
-    pushDialog('Giudice','La corte ritiene la linea difensiva non sufficiente a scalfire l’impianto accusatorio.','');
-  }
-  state.day++;
-  renderHud();
-  renderDocs();
-  switchScreen('studio');
-}
-
-function playRound(choice){
-  const c=currentCase();
-  if(!c) return;
-  state.selectedChoice=choice;
-  document.querySelectorAll('.choice').forEach(b=>b.classList.toggle('selected',b.dataset.choice===choice));
-  const round=c.rounds[0];
-  pushDialog('Difesa',round.defense[choice],choice);
-  pushDialog('Aula',round.response,'');
-  concludeCase(choice,c);
-}
-
-document.querySelectorAll('.nav').forEach(btn=>btn.onclick=()=>switchScreen(btn.dataset.target));
-document.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>playRound(btn.dataset.choice));
-themeBtn.onclick=()=>document.documentElement.setAttribute('data-theme',document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
-
-renderHud();
-renderCases();
-renderManual();
-renderDocs();
-</script>
+    // Init
+    renderStaff();
+    renderTable();
+  </script>
 </body>
 </html>
